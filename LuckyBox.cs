@@ -18,6 +18,7 @@ namespace Oxide.Plugins
         private const string NoteItem = "note";
         private const string SmallWoodenBoxPrefab = "assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab";
         private const ulong BoxSkinId = 2000024196;
+        private const string FireworkSoundEffect = "assets/prefabs/npc/patrol helicopter/effects/rocket_fire.prefab";
         private BaseEntity luckyBox;
         private System.Random random = new System.Random();
 
@@ -221,6 +222,7 @@ namespace Oxide.Plugins
 
             PrintToChat($"The lucky box has been found by {player.displayName}!");
             RewardPlayer(player);
+            PlayFireworkSound();
             luckyBox?.Kill();
             luckyBox = null;
             boxFound = true;
@@ -241,6 +243,14 @@ namespace Oxide.Plugins
             else
             {
                 PrintError("Failed to create note item.");
+            }
+        }
+
+        private void PlayFireworkSound()
+        {
+            foreach (BasePlayer player in BasePlayer.activePlayerList)
+            {
+                Effect.server.Run(FireworkSoundEffect, player.transform.position);
             }
         }
 
