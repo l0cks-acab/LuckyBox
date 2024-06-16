@@ -1,6 +1,8 @@
 # LuckyBox Plugin
 
 The LuckyBox plugin for Rust is designed to spawn a lucky box in a small wooden box at a random location outside of monuments. When the lucky box is found, the player receives a note with a secret key, and a firework sound effect is played for all online players. Additionally, a Discord webhook notification is sent with the secret key. The purpose of this plugin is so players can open a ticket on the respective discord and claim a prize with the secret key.
+## Author
+ Plugin developed by **herbs.acab**
 
 ## Features
 
