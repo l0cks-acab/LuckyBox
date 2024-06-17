@@ -50,7 +50,7 @@ The plugin configuration includes the following settings:
   "BoxFound": false,
   "BoxPosition": null
 }
-
+```
 # LuckyBoxNotifier
 
 **Author:** herbs.acab  
@@ -68,8 +68,8 @@ After the first load, the plugin will generate a configuration file located at `
 ### Default Configuration
 ```json
 {
-  "WebhookUrl": "YOUR_WEBHOOK_URL_HERE",
-  "AdminWebhookUrl": "YOUR_ADMIN_WEBHOOK_URL_HERE",
-  "AdminFindWebhookUrl": "YOUR_ADMIN_FIND_WEBHOOK_URL_HERE"
+  "WebhookUrl": "YOUR_WEBHOOK_URL_HERE",   // Notify players when a new box spawns.
+  "AdminWebhookUrl": "YOUR_ADMIN_WEBHOOK_URL_HERE", // Post to admins when a new box is created with the secret key.
+  "AdminFindWebhookUrl": "YOUR_ADMIN_FIND_WEBHOOK_URL_HERE" // Post to staff which player has found the box.
 }
-
+```
