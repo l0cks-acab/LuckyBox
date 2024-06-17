@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "locks", "1.1.5")]
+    [Info("LuckyBox", "locks", "1.0.0")]
     [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder, and sends a Discord webhook message.")]
     public class LuckyBox : RustPlugin
     {
@@ -98,53 +98,60 @@ namespace Oxide.Plugins
 
         private void SpawnLuckyBoxAtPosition(Vector3 position)
         {
-            luckyBox = GameManager.server.CreateEntity(SmallWoodenBoxPrefab, position, Quaternion.identity, true);
-            if (luckyBox == null)
+            try
             {
-                PrintError("Failed to create small wooden box entity.");
-                return;
-            }
+                luckyBox = GameManager.server.CreateEntity(SmallWoodenBoxPrefab, position, Quaternion.identity, true);
+                if (luckyBox == null)
+                {
+                    PrintError("Failed to create small wooden box entity.");
+                    return;
+                }
 
-            luckyBox.skinID = BoxSkinId;
-            luckyBox.Spawn();
+                luckyBox.skinID = BoxSkinId;
+                luckyBox.Spawn();
 
-            var storageContainer = luckyBox.GetComponent<StorageContainer>();
-            if (storageContainer?.inventory == null)
-            {
-                PrintError("Small wooden box does not have an inventory.");
-                return;
-            }
+                var storageContainer = luckyBox.GetComponent<StorageContainer>();
+                if (storageContainer?.inventory == null)
+                {
+                    PrintError("Small wooden box does not have an inventory.");
+                    return;
+                }
 
-            // Make sure the item exists in the game
-            ItemDefinition boxItemDef = ItemManager.FindItemDefinition(LuckyBoxItemId);
-            if (boxItemDef == null)
-            {
-                PrintError("Failed to find the lucky box item definition.");
-                return;
-            }
+                // Make sure the item exists in the game
+                ItemDefinition boxItemDef = ItemManager.FindItemDefinition(LuckyBoxItemId);
+                if (boxItemDef == null)
+                {
+                    PrintError("Failed to find the lucky box item definition.");
+                    return;
+                }
 
-            Item luckyBoxItem = ItemManager.Create(boxItemDef, 1);
-            if (luckyBoxItem == null)
-            {
-                PrintError("Failed to create lucky box item.");
-                return;
-            }
+                Item luckyBoxItem = ItemManager.Create(boxItemDef, 1);
+                if (luckyBoxItem == null)
+                {
+                    PrintError("Failed to create lucky box item.");
+                    return;
+                }
 
-            if (!storageContainer.inventory.Insert(luckyBoxItem))
-            {
-                PrintError("Failed to insert the lucky box item into the small wooden box.");
-                return;
-            }
+                if (!storageContainer.inventory.Insert(luckyBoxItem))
+                {
+                    PrintError("Failed to insert the lucky box item into the small wooden box.");
+                    return;
+                }
 
-            if (luckyBox != null)
-            {
-                PrintToChat("A lucky box has been hidden in a small wooden box on the map. Happy hunting!");
-                SendDiscordMessage(predefinedKey);
-                SaveBoxPosition();
+                if (luckyBox != null)
+                {
+                    PrintToChat("A lucky box has been hidden in a small wooden box on the map. Happy hunting!");
+                    SendDiscordMessage(predefinedKey);
+                    SaveBoxPosition();
+                }
+                else
+                {
+                    PrintError("Failed to assign lucky box entity.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                PrintError("Failed to assign lucky box entity.");
+                PrintError($"Exception during SpawnLuckyBoxAtPosition: {ex.Message}");
             }
         }
 
