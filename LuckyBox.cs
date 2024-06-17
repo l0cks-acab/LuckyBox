@@ -1,5 +1,5 @@
-using Oxide.Core.Plugins;
 using Oxide.Core;
+using Oxide.Core.Plugins;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -138,6 +138,9 @@ namespace Oxide.Plugins
                 {
                     PrintToChat("A lucky box has been hidden in a small wooden box on the map. Happy hunting!");
                     SaveBoxPosition();
+
+                    // Call hook to notify other plugins
+                    Interface.CallHook("OnLuckyBoxSpawned", position, predefinedKey);
                 }
                 else
                 {
@@ -231,6 +234,9 @@ namespace Oxide.Plugins
             Config["BoxFound"] = true;
             Config["BoxPosition"] = null;
             SaveConfig();
+
+            // Call hook to notify other plugins
+            Interface.CallHook("OnLuckyBoxFound", player, luckyBox.transform.position, predefinedKey);
         }
 
         private void RewardPlayer(BasePlayer player)
