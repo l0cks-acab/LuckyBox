@@ -1,6 +1,8 @@
 using Oxide.Core;
 using Oxide.Core.Plugins;
+using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Oxide.Plugins
@@ -45,9 +47,9 @@ namespace Oxide.Plugins
             }
 
             // Subscribe to the event when a new LuckyBox is spawned
-            LuckyBox.Call("OnLuckyBoxSpawned", new Action<Vector3, string>(OnLuckyBoxSpawned));
+            LuckyBox.Call("OnLuckyBoxSpawned", (Action<Vector3, string>)OnLuckyBoxSpawned);
             // Subscribe to the event when a LuckyBox is found
-            LuckyBox.Call("OnLuckyBoxFound", new Action<BasePlayer, Vector3, string>(OnLuckyBoxFound));
+            LuckyBox.Call("OnLuckyBoxFound", (Action<BasePlayer, Vector3, string>)OnLuckyBoxFound);
         }
 
         private void LoadConfigData()
