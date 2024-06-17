@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.3")]
+    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.6")]
     [Description("Notifies via Discord when a new LuckyBox is spawned and when it is found.")]
     public class LuckyBoxNotifier : RustPlugin
     {
@@ -60,37 +60,59 @@ namespace Oxide.Plugins
         private void OnLuckyBoxSpawned(Vector3 position, string secretKey)
         {
             PrintWarning($"LuckyBox spawned at {position} with secret key: {secretKey}");
-            // Notify regular users
-            SendDiscordMessage(configData.WebhookUrl, $"A new LuckyBox has spawned on the map!");
+            // Notify regular users with an embed
+            SendDiscordEmbed(configData.WebhookUrl, "New LuckyBox Spawned", "A new LuckyBox has spawned on the map!");
 
-            // Notify admins
-            SendDiscordMessage(configData.AdminWebhookUrl, $"A new LuckyBox has spawned at {position} with the secret key: {secretKey}");
+            // Notify admins with an embed
+            SendDiscordEmbed(configData.AdminWebhookUrl, "New LuckyBox Spawned", $"A new LuckyBox has spawned with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!", position);
         }
 
         private void OnLuckyBoxFound(BasePlayer player, Vector3 position, string secretKey)
         {
             PrintWarning($"{player.displayName} found LuckyBox at {position} with secret key: {secretKey}");
-            // Notify admins when a LuckyBox is found
-            SendDiscordMessage(configData.AdminFindWebhookUrl, $"{player.displayName} has found a LuckyBox at {position} with the secret key: {secretKey}");
+            // Notify admins with an embed
+            SendDiscordEmbed(configData.AdminFindWebhookUrl, "LuckyBox Found", $"{player.displayName} has found a LuckyBox with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!", position);
         }
 
-        private void SendDiscordMessage(string webhookUrl, string message)
+        private void SendDiscordEmbed(string webhookUrl, string title, string description, Vector3? position = null)
         {
-            PrintWarning($"Sending Discord message to {webhookUrl}: {message}");
-            var payload = new Dictionary<string, object>
+            PrintWarning($"Sending Discord embed to {webhookUrl}: {title} - {description}");
+            var fields = new List<object>();
+            if (position.HasValue)
             {
-                { "content", message }
+                fields.Add(new
+                {
+                    name = "Teleport Command",
+                    value = "Use /tpbox to teleport yourself to the luckybox!",
+                    inline = true
+                });
+            }
+
+            var embed = new
+            {
+                embeds = new[]
+                {
+                    new
+                    {
+                        title = title,
+                        description = description,
+                        color = 3447003, // Blue color
+                        fields = fields
+                    }
+                }
             };
 
-            webrequest.Enqueue(webhookUrl, JsonConvert.SerializeObject(payload), (code, response) =>
+            var payload = JsonConvert.SerializeObject(embed);
+
+            webrequest.Enqueue(webhookUrl, payload, (code, response) =>
             {
                 if (code != 200)
                 {
-                    PrintError($"Failed to send Discord message. Code: {code}, Response: {response}");
+                    PrintError($"Failed to send Discord embed. Code: {code}, Response: {response}");
                 }
                 else
                 {
-                    PrintWarning("Discord message sent successfully.");
+                    PrintWarning("Discord embed sent successfully.");
                 }
             }, this, RequestMethod.POST, new Dictionary<string, string> { { "Content-Type", "application/json" } });
         }
