@@ -1,8 +1,8 @@
 # LuckyBox Plugin
 
-The LuckyBox plugin for Rust spawns a lucky box in a small wooden box at a random location outside of monuments. When the lucky box is found, the player receives a note with a secret key, and a firework sound effect is played for all online players.
+The LuckyBox plugin for Rust spawns a lucky box in a small wooden box at a random location outside of monuments. When the lucky box is found, the player receives a note with a secret key, and a firework sound effect is played for all online players. Please see below for additional discord webhook integration.
 
-### Made by herbs.acab
+**Author:** herbs.acab 
 
 ## Features
 
@@ -50,3 +50,26 @@ The plugin configuration includes the following settings:
   "BoxFound": false,
   "BoxPosition": null
 }
+
+# LuckyBoxNotifier
+
+**Author:** herbs.acab  
+**Version:** 1.2.0  
+**Description:** Notifies via Discord when a new LuckyBox is spawned and when it is found.
+
+## Overview
+
+The LuckyBoxNotifier plugin is designed to work alongside the LuckyBox plugin. It sends notifications to specified Discord webhooks when a new LuckyBox is spawned on the map and when it is found by a player. The plugin provides a configuration file for setting the webhook URLs.
+
+## Configuration
+
+After the first load, the plugin will generate a configuration file located at `oxide/config/LuckyBoxNotifier.json`. 
+
+### Default Configuration
+```json
+{
+  "WebhookUrl": "YOUR_WEBHOOK_URL_HERE",
+  "AdminWebhookUrl": "YOUR_ADMIN_WEBHOOK_URL_HERE",
+  "AdminFindWebhookUrl": "YOUR_ADMIN_FIND_WEBHOOK_URL_HERE"
+}
+
