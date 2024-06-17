@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.1")]
+    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.3")]
     [Description("Notifies via Discord when a new LuckyBox is spawned and when it is found.")]
     public class LuckyBoxNotifier : RustPlugin
     {
@@ -46,11 +46,6 @@ namespace Oxide.Plugins
                 PrintError("LuckyBox plugin is not loaded. This plugin requires the LuckyBox plugin to function.");
                 return;
             }
-
-            // Subscribe to the event when a new LuckyBox is spawned
-            LuckyBox.Call("OnLuckyBoxSpawned", (Action<Vector3, string>)OnLuckyBoxSpawned);
-            // Subscribe to the event when a LuckyBox is found
-            LuckyBox.Call("OnLuckyBoxFound", (Action<BasePlayer, Vector3, string>)OnLuckyBoxFound);
         }
 
         private void LoadConfigData()
@@ -64,6 +59,7 @@ namespace Oxide.Plugins
 
         private void OnLuckyBoxSpawned(Vector3 position, string secretKey)
         {
+            PrintWarning($"LuckyBox spawned at {position} with secret key: {secretKey}");
             // Notify regular users
             SendDiscordMessage(configData.WebhookUrl, $"A new LuckyBox has spawned on the map!");
 
@@ -73,12 +69,14 @@ namespace Oxide.Plugins
 
         private void OnLuckyBoxFound(BasePlayer player, Vector3 position, string secretKey)
         {
+            PrintWarning($"{player.displayName} found LuckyBox at {position} with secret key: {secretKey}");
             // Notify admins when a LuckyBox is found
             SendDiscordMessage(configData.AdminFindWebhookUrl, $"{player.displayName} has found a LuckyBox at {position} with the secret key: {secretKey}");
         }
 
         private void SendDiscordMessage(string webhookUrl, string message)
         {
+            PrintWarning($"Sending Discord message to {webhookUrl}: {message}");
             var payload = new Dictionary<string, object>
             {
                 { "content", message }
@@ -88,7 +86,11 @@ namespace Oxide.Plugins
             {
                 if (code != 200)
                 {
-                    PrintError($"Failed to send Discord message: {response}");
+                    PrintError($"Failed to send Discord message. Code: {code}, Response: {response}");
+                }
+                else
+                {
+                    PrintWarning("Discord message sent successfully.");
                 }
             }, this, RequestMethod.POST, new Dictionary<string, string> { { "Content-Type", "application/json" } });
         }
