@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "herbs.acab", "1.0.1")]
+    [Info("LuckyBox", "locks", "1.0.1")]
     [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder, and sends a Discord webhook message.")]
     public class LuckyBox : RustPlugin
     {
@@ -233,6 +233,7 @@ namespace Oxide.Plugins
             PrintToChat($"The lucky box has been found by {player.displayName}!");
             RewardPlayer(player);
             PlayFireworkSound();
+            SendDiscordMessage(player.displayName, player.UserIDString);
             luckyBox?.Kill();
             luckyBox = null;
             boxFound = true;
@@ -360,16 +361,30 @@ namespace Oxide.Plugins
             }
         }
 
-        private void SendDiscordMessage(string secretKey)
+        private void SendDiscordMessage(string playerName, string steamID)
         {
-            var embed = new
+            var embed1 = new
             {
                 author = new
                 {
                     name = "Lucky Box"
                 },
-                description = $"A lucky box has been hidden in a small wooden box on the map!\nSecret Key: {secretKey}",
+                description = $"A lucky box has been hidden in a small wooden box on the map!\nSecret Key: {predefinedKey}",
                 color = 16776960, // Yellow color
+                footer = new
+                {
+                    text = "plugin developed by: herbs.acab"
+                }
+            };
+
+            var embed2 = new
+            {
+                author = new
+                {
+                    name = "Lucky Box"
+                },
+                description = $"The lucky box has been found by {playerName} (SteamID: {steamID})",
+                color = 16711680, // Red color
                 footer = new
                 {
                     text = "plugin developed by: herbs.acab"
@@ -378,7 +393,7 @@ namespace Oxide.Plugins
 
             var payload = new
             {
-                embeds = new[] { embed }
+                embeds = new[] { embed1, embed2 }
             };
 
             var json = JsonConvert.SerializeObject(payload);
