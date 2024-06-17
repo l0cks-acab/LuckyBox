@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "locks", "1.0.0")]
+    [Info("LuckyBox", "locks", "1.0.1")]
     [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder, and sends a Discord webhook message.")]
     public class LuckyBox : RustPlugin
     {
@@ -25,6 +25,7 @@ namespace Oxide.Plugins
         private string predefinedKey;
         private bool boxFound;
         private string webhookUrl;
+        private string newBoxWebhookUrl;
         private Vector3 boxPosition;
 
         protected override void LoadDefaultConfig()
@@ -32,6 +33,7 @@ namespace Oxide.Plugins
             Config["PredefinedKey"] = "This is a secret key";
             Config["BoxFound"] = false;
             Config["WebhookUrl"] = "https://discord.com/api/webhooks/your-webhook-url";
+            Config["NewBoxWebhookUrl"] = "https://discord.com/api/webhooks/your-newbox-webhook-url";
             Config["BoxPosition"] = null;
             SaveConfig();
         }
@@ -41,6 +43,7 @@ namespace Oxide.Plugins
             predefinedKey = Config["PredefinedKey"]?.ToString() ?? "This is a secret key";
             boxFound = Config["BoxFound"] != null && Convert.ToBoolean(Config["BoxFound"]);
             webhookUrl = Config["WebhookUrl"]?.ToString() ?? "https://discord.com/api/webhooks/your-webhook-url";
+            newBoxWebhookUrl = Config["NewBoxWebhookUrl"]?.ToString() ?? "https://discord.com/api/webhooks/your-newbox-webhook-url";
 
             if (Config["BoxPosition"] != null)
             {
@@ -61,8 +64,8 @@ namespace Oxide.Plugins
 
             // Register the chat commands
             AddCovalenceCommand("box", "BoxStatusCommand");
-            AddCovalenceCommand("abox", "AdminBoxStatusCommand");
-            AddCovalenceCommand("newabox", "NewAdminBoxCommand");
+            AddCovalenceCommand("locatebox", "AdminBoxStatusCommand");
+            AddCovalenceCommand("newbox", "NewAdminBoxCommand");
             AddCovalenceCommand("tpbox", "TeleportToBoxCommand");
         }
 
@@ -141,7 +144,7 @@ namespace Oxide.Plugins
                 if (luckyBox != null)
                 {
                     PrintToChat("A lucky box has been hidden in a small wooden box on the map. Happy hunting!");
-                    SendDiscordMessage(predefinedKey);
+                    SendNewBoxDiscordMessage();
                     SaveBoxPosition();
                 }
                 else
@@ -274,7 +277,7 @@ namespace Oxide.Plugins
             }
         }
 
-        // This method handles the /abox command for administrators
+        // This method handles the /locatebox command for administrators
         private void AdminBoxStatusCommand(IPlayer player, string command, string[] args)
         {
             if (!player.IsAdmin)
@@ -296,7 +299,7 @@ namespace Oxide.Plugins
             Puts($"Admin {player.Name} checked the lucky box's location: {gridLocation} (Map Grid: {mapGrid})");
         }
 
-        // This method handles the /newabox command for administrators to create a new lucky box
+        // This method handles the /newbox command for administrators to create a new lucky box
         private void NewAdminBoxCommand(IPlayer player, string command, string[] args)
         {
             if (!player.IsAdmin)
@@ -307,7 +310,7 @@ namespace Oxide.Plugins
 
             if (args.Length == 0)
             {
-                player.Reply("You must provide a new secret key. Usage: /newabox <secret_key>");
+                player.Reply("You must provide a new secret key. Usage: /newbox <secret_key>");
                 return;
             }
 
@@ -390,6 +393,43 @@ namespace Oxide.Plugins
                 catch (Exception ex)
                 {
                     PrintError($"Failed to send Discord message: {ex.Message}");
+                }
+            }
+        }
+
+        private void SendNewBoxDiscordMessage()
+        {
+            var embed = new
+            {
+                author = new
+                {
+                    name = "Lucky Box"
+                },
+                description = "A new lucky box has spawned somewhere in the world! Happy hunting!",
+                color = 65280, // Green color
+                footer = new
+                {
+                    text = "plugin developed by: herbs.acab"
+                }
+            };
+
+            var payload = new
+            {
+                embeds = new[] { embed }
+            };
+
+            var json = JsonConvert.SerializeObject(payload);
+            using (var client = new WebClient())
+            {
+                try
+                {
+                    client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+                    client.UploadString(newBoxWebhookUrl, "POST", json);
+                    PrintToConsole($"Successfully sent new box Discord message: {json}");
+                }
+                catch (Exception ex)
+                {
+                    PrintError($"Failed to send new box Discord message: {ex.Message}");
                 }
             }
         }
