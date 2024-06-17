@@ -4,14 +4,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Oxide.Core.Libraries.Covalence;
-using System.Collections.Specialized;
-using System.Net;
 using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "herbs.acab", "1.2.1")]
-    [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder, and sends a Discord webhook message.")]
+    [Info("LuckyBox", "herbs.acab", "1.0.1")]
+    [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder.")]
     public class LuckyBox : RustPlugin
     {
         private const int LuckyBoxItemId = -1002156085;
@@ -24,26 +22,20 @@ namespace Oxide.Plugins
 
         private string predefinedKey;
         private bool boxFound;
-        private string webhookUrl;
-        private string newBoxWebhookUrl;
         private Vector3 boxPosition;
 
         protected override void LoadDefaultConfig()
         {
+            PrintWarning("Creating a new configuration file");
             Config["PredefinedKey"] = "This is a secret key";
             Config["BoxFound"] = false;
-            Config["WebhookUrl"] = "https://discord.com/api/webhooks/your-webhook-url";
-            Config["NewBoxWebhookUrl"] = "https://discord.com/api/webhooks/your-newbox-webhook-url";
             Config["BoxPosition"] = null;
-            SaveConfig();
         }
 
         private void Init()
         {
             predefinedKey = Config["PredefinedKey"]?.ToString() ?? "This is a secret key";
             boxFound = Config["BoxFound"] != null && Convert.ToBoolean(Config["BoxFound"]);
-            webhookUrl = Config["WebhookUrl"]?.ToString() ?? "https://discord.com/api/webhooks/your-webhook-url";
-            newBoxWebhookUrl = Config["NewBoxWebhookUrl"]?.ToString() ?? "https://discord.com/api/webhooks/your-newbox-webhook-url";
 
             if (Config["BoxPosition"] != null)
             {
@@ -71,6 +63,7 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
+            SaveConfig();
             SaveBoxPosition();
             luckyBox?.Kill();
         }
@@ -144,7 +137,6 @@ namespace Oxide.Plugins
                 if (luckyBox != null)
                 {
                     PrintToChat("A lucky box has been hidden in a small wooden box on the map. Happy hunting!");
-                    SendNewBoxDiscordMessage();
                     SaveBoxPosition();
                 }
                 else
@@ -233,7 +225,6 @@ namespace Oxide.Plugins
             PrintToChat($"The lucky box has been found by {player.displayName}!");
             RewardPlayer(player);
             PlayFireworkSound();
-            SendDiscordMessage(player.displayName, player.UserIDString);
             luckyBox?.Kill();
             luckyBox = null;
             boxFound = true;
@@ -358,94 +349,6 @@ namespace Oxide.Plugins
                 basePlayer.Teleport(position);
                 player.Reply($"You have been teleported to the lucky box at: {position}");
                 Puts($"Admin {player.Name} teleported to the lucky box at: {position}");
-            }
-        }
-
-        private void SendDiscordMessage(string playerName, string steamID)
-        {
-            var embed1 = new
-            {
-                author = new
-                {
-                    name = "Lucky Box"
-                },
-                description = $"A lucky box has been hidden in a small wooden box on the map!\nSecret Key: {predefinedKey}",
-                color = 16776960, // Yellow color
-                footer = new
-                {
-                    text = "plugin developed by: herbs.acab"
-                }
-            };
-
-            var embed2 = new
-            {
-                author = new
-                {
-                    name = "Lucky Box"
-                },
-                description = $"The lucky box has been found by {playerName} (SteamID: {steamID})",
-                color = 16711680, // Red color
-                footer = new
-                {
-                    text = "plugin developed by: herbs.acab"
-                }
-            };
-
-            var payload = new
-            {
-                embeds = new[] { embed1, embed2 }
-            };
-
-            var json = JsonConvert.SerializeObject(payload);
-            using (var client = new WebClient())
-            {
-                try
-                {
-                    client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-                    client.UploadString(webhookUrl, "POST", json);
-                    PrintToConsole($"Successfully sent Discord message: {json}");
-                }
-                catch (Exception ex)
-                {
-                    PrintError($"Failed to send Discord message: {ex.Message}");
-                }
-            }
-        }
-
-        private void SendNewBoxDiscordMessage()
-        {
-            var embed = new
-            {
-                author = new
-                {
-                    name = "Lucky Box"
-                },
-                description = "A new lucky box has spawned somewhere in the world! Happy hunting!",
-                color = 65280, // Green color
-                footer = new
-                {
-                    text = "plugin developed by: herbs.acab"
-                }
-            };
-
-            var payload = new
-            {
-                embeds = new[] { embed }
-            };
-
-            var json = JsonConvert.SerializeObject(payload);
-            using (var client = new WebClient())
-            {
-                try
-                {
-                    client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-                    client.UploadString(newBoxWebhookUrl, "POST", json);
-                    PrintToConsole($"Successfully sent new box Discord message: {json}");
-                }
-                catch (Exception ex)
-                {
-                    PrintError($"Failed to send new box Discord message: {ex.Message}");
-                }
             }
         }
 
