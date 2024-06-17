@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "locks", "1.0.1")]
+    [Info("LuckyBox", "herbs.acab", "1.2.1")]
     [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder, and sends a Discord webhook message.")]
     public class LuckyBox : RustPlugin
     {
