@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.6")]
+    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.7")]
     [Description("Notifies via Discord when a new LuckyBox is spawned and when it is found.")]
     public class LuckyBoxNotifier : RustPlugin
     {
@@ -64,30 +64,20 @@ namespace Oxide.Plugins
             SendDiscordEmbed(configData.WebhookUrl, "New LuckyBox Spawned", "A new LuckyBox has spawned on the map!");
 
             // Notify admins with an embed
-            SendDiscordEmbed(configData.AdminWebhookUrl, "New LuckyBox Spawned", $"A new LuckyBox has spawned with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!", position);
+            SendDiscordEmbed(configData.AdminWebhookUrl, "New LuckyBox Spawned", $"A new LuckyBox has spawned with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!");
         }
 
         private void OnLuckyBoxFound(BasePlayer player, Vector3 position, string secretKey)
         {
             PrintWarning($"{player.displayName} found LuckyBox at {position} with secret key: {secretKey}");
             // Notify admins with an embed
-            SendDiscordEmbed(configData.AdminFindWebhookUrl, "LuckyBox Found", $"{player.displayName} has found a LuckyBox with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!", position);
+            SendDiscordEmbed(configData.AdminFindWebhookUrl, "LuckyBox Found", $"{player.displayName} has found a LuckyBox with the secret key: {secretKey}. Use /tpbox to teleport yourself to the luckybox!");
         }
 
-        private void SendDiscordEmbed(string webhookUrl, string title, string description, Vector3? position = null)
+        private void SendDiscordEmbed(string webhookUrl, string title, string description)
         {
             PrintWarning($"Sending Discord embed to {webhookUrl}: {title} - {description}");
-            var fields = new List<object>();
-            if (position.HasValue)
-            {
-                fields.Add(new
-                {
-                    name = "Teleport Command",
-                    value = "Use /tpbox to teleport yourself to the luckybox!",
-                    inline = true
-                });
-            }
-
+            
             var embed = new
             {
                 embeds = new[]
@@ -96,8 +86,7 @@ namespace Oxide.Plugins
                     {
                         title = title,
                         description = description,
-                        color = 3447003, // Blue color
-                        fields = fields
+                        color = 3447003 // Blue color
                     }
                 }
             };
@@ -106,7 +95,7 @@ namespace Oxide.Plugins
 
             webrequest.Enqueue(webhookUrl, payload, (code, response) =>
             {
-                if (code != 200)
+                if (code != 204)
                 {
                     PrintError($"Failed to send Discord embed. Code: {code}, Response: {response}");
                 }
