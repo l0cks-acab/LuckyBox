@@ -1,4 +1,5 @@
 using Oxide.Core;
+using Oxide.Core.Libraries;
 using Oxide.Core.Plugins;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.0")]
+    [Info("LuckyBoxNotifier", "herbs.acab", "1.2.1")]
     [Description("Notifies via Discord when a new LuckyBox is spawned and when it is found.")]
     public class LuckyBoxNotifier : RustPlugin
     {
@@ -35,7 +36,7 @@ namespace Oxide.Plugins
             SaveConfig();
         }
 
-        private void Init()
+        private void OnServerInitialized()
         {
             LoadConfigData();
 
