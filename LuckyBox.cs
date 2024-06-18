@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("LuckyBox", "herbs.acab", "1.0.1")]
+    [Info("LuckyBox", "herbs.acab", "1.0.2")]
     [Description("A plugin that spawns a lucky box in a small wooden box, rewards the finder.")]
     public class LuckyBox : RustPlugin
     {
@@ -32,7 +32,12 @@ namespace Oxide.Plugins
             Config["BoxPosition"] = null;
         }
 
-        private void Init()
+        private void OnServerInitialized()
+        {
+            InitPlugin();
+        }
+
+        private void InitPlugin()
         {
             predefinedKey = Config["PredefinedKey"]?.ToString() ?? "This is a secret key";
             boxFound = Config["BoxFound"] != null && Convert.ToBoolean(Config["BoxFound"]);
